@@ -1,5 +1,7 @@
 %% PARAMETERS
 clear; close all;
+N = 1e4;
+T = 1e5;
 DD = ['{\bf{\color[rgb]{' num2str([27 120 55]/255) '}F}_1}'];
 DP = ['{\bf{\color[rgb]{' num2str([27 120 55]/255) '}F}_2}'];
 PD = ['{\bf{\color[rgb]{' num2str([153 112 171]/255) '}V}_1}'];
@@ -9,14 +11,14 @@ PR = {DD, DP, PD, PP};
 
 %% Panel B: Time series
 clc; tic;
-T = 6000;
-A = 0.95;
+Tv = 7000;
+A = 0.99;
 B = 0.8;
-C = 0.02;
-D = 0.02;
+C = 0.5;
+D = 0.001;
 rng(2);
-S = zeros(T, 5);
-for i = 2:T
+S = zeros(Tv, 5);
+for i = 2:Tv
     S(i, :) = S(i-1, :);
     p = rand(1, 2); % find two random numbers between 0 and 1
     G = [S(i,3)*D+1             S(i,4)*D+1              S(i,1)*D+1              S(i,2)*D+1 ...
@@ -58,16 +60,15 @@ set(gca, 'Box', 'on', 'FontSize', 20, 'LineWidth', 1, 'XTick', 0:200:1600, 'YTic
 text(410, 40, ['\gamma = ' num2str(C) '; \delta = ' num2str(D)], 'FontSize', 22, 'HorizontalAlignment', 'center')
 xlabel('Time ({\itt})', 'FontSize', 24);
 ylabel('Cluster size', 'FontSize', 24);
-axis([0 820 -45 45]);
-saveas(gcf, 'Fig6b.png');
+axis([0 800 -45 45]);
+f = gcf; f.PaperSize = [f.PaperPosition(3) f.PaperPosition(4)];
+print('Fig6b.pdf', '-dpdf');
 toc;
 
 %% Panel C: Cluster size distribution
-N = 1e4;
-T = 1e5;
 Av = 0.99*ones(1,6);
 Bv = 0.8*ones(1,6);
-Cv = [0 0 0.1 0 0 0.1];
+Cv = [0 0 0.5 0 0 0.5];
 Dv = [0 1e-3 1e-3 0 1e-3 1e-3];
 generateData(N, T, Av, Bv, Cv, Dv);
 
@@ -80,19 +81,19 @@ for i = 1:numel(Dv)
         nexttile;
     end
     load(['_data/N' num2str(N) '-T' num2str(T) '-A' num2str(Av(i)*100) '-B' num2str(Bv(i)*100) '-C'  num2str(Cv(i)*10000) '-D' num2str(Dv(i)*10000)]);
-    plot(0:199, 1-histcounts(RES(:, floor((i-1)/3)+3), 0:200, 'Normalization', 'cdf'), '-', 'Color', CC(i, :), 'LineWidth', 3, ...
+    plot(0:199, 1-histcounts(RES(:, floor((i-1)/3)+3), 0:200, 'Normalization', 'cdf'), '-', 'Color', CC(i, :), 'LineWidth', mod(i-1, 3)+1, ...
         'DisplayName', ['\gamma=' num2str(Cv(i)) ', \delta=' num2str(Dv(i))]); hold on;
     xlabel(['Cluster size ' PR{floor((i-1)/3)+3}], 'FontSize', 24);
-    set(gca, 'Box', 'on', 'FontSize', 20, 'LineWidth', 1.5, 'YScale', 'log', 'XTick', 0:20:80, 'YTick', '');
+    set(gca, 'Box', 'on', 'FontSize', 20, 'LineWidth', 1.5, 'YScale', 'log', 'XTick', 0:20:80);
     axis([0 80 0.01 5]);
 end
+yticklabels('')
 set(nexttile(1), 'XDir', 'reverse', 'YTick', [1e-3 1e-2 0.1 1]);
 legend('Box', 'off', 'Location', 'northwest', 'FontSize', 18);        
-saveas(gcf, 'Fig6c.png');
+f = gcf; f.PaperSize = [f.PaperPosition(3) f.PaperPosition(4)];
+print('Fig6c.pdf', '-dpdf');
 
 %% Panel D: Polarity vs. average cluster size
-N = 1e4;
-T = 1e5;
 Av = [0.80  0.92  0.96  0.98  0.99  0.80  0.92  0.96  0.98  0.99  0.80  0.92  0.96  0.98  0.99];
 Bv = [0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80  0.80];
 Cv = [0     0     0     0     0     0     0     0     0     0     0.1   0.1   0.1   0.1   0.1]*5;
@@ -110,54 +111,52 @@ for i = numel(Dv):-1:1
     load(['_data/N' num2str(N) '-T' num2str(T) '-A' num2str(Av(i)*100) '-B' num2str(Bv(i)*100) '-C' num2str(Cv(i)*10000) '-D' num2str(Dv(i)*10000)]);
     S(i, :) = [mean(RES(:, 4))/mean(RES(:, 3)) mean(RES(:, 6))];
     if mod(i, 5) == 1
-        plot(S(i:i+4, 2), S(i:i+4, 1), '.-', 'Color', CC((i+4)/5, :), 'LineWidth', 2.5, 'MarkerSize', 40, ...
+        plot(S(i:i+4, 2), S(i:i+4, 1), '.-', 'Color', CC((i+4)/5, :), 'LineWidth', 2.5, 'MarkerSize', 35, ...
             'DisplayName', ['\gamma=' num2str(Cv(i)) ', \delta='  num2str(Dv(i))]); hold on;
     end
 end
 set(gca, 'Box', 'on', 'FontSize', 19, 'LineWidth', 1.5, 'XTick', 0:20:80, 'YTick', 1:2:9);
 legend('Box', 'off', 'Location', 'northwest', 'FontSize', 18);
-axis([0 90 0 10], 'square')
+axis([0 80 0 11], 'square')
 f = gcf; f.PaperSize = [f.PaperPosition(3) f.PaperPosition(4)];
 print('Fig6d.pdf', '-dpdf');
 
 %% Panel E: Phase diagram
-N = 1e4;
-T = 1e5;
 Av = 0.99*ones(1, 81);
 Bv = 0.8*ones(1, 81);
 Cv = [zeros(1,9) 1e-4*ones(1,9) 5e-4*ones(1,9) 1e-3*ones(1,9) 5e-3*ones(1,9) 1e-2*ones(1,9) 5e-2*ones(1,9) ones(1,9)/10 ones(1,9)/2];
 Dv = repmat([0 1e-4 5e-4 1e-3 5e-3 1e-2 5e-2 0.1 0.5], 1, 9);
 generateData(N, T, Av, Bv, Cv, Dv);
 
-% dx = 5;
-% figure(1); clf;
-% set(gcf, 'color', 'w', 'Position', [0 0 480 400]);
-% S = zeros(dx, dx);
-% for C = Cv(1:dx:end)
-%     y = 1;
-%     for D = Dv(1:5)
-%         load(['_data/N' num2str(N) '-T' num2str(T) '-A' num2str(Av(1)*100) '-B' num2str(Bv(1)*100) '-C' num2str(C*10000) '-D' num2str(D*10000)]);
-%         S(dx, y) = mean(RES(:, 4))/mean(RES(:, 3));
-%         y = y + 1;
-%     end
-%     dx = dx - 1;
-% end
-% imagesc(S);
-% colormap(flipud(jet));
-% c = colorbar('Ticks', 1:2:9, 'FontSize', 20, 'Limits', [1 9]);
-% c.Label.FontSize = 22;
-% c.Label.String = ['Polarity ' PR{4} '/' PR{3}];
-% set(gca, 'FontSize', 22, 'XTick', 1:5, 'YTick', 1:5, 'XTickLabel', Dv(1:5), 'YTickLabel', Cv(end:-5:1), 'dataAspectRatio',[1 1 1]);
-% ylabel('\gamma', 'FontSize', 24, 'FontWeight', 'bold');
-% xlabel('\delta', 'FontSize', 24, 'FontWeight', 'bold');
-% saveas(gcf, 'Fig6e.png');
+dx = 9;
+figure(1); clf;
+set(gcf, 'color', 'w', 'Position', [0 0 480 400]);
+S = zeros(dx, dx);
+for C = Cv(1:dx:end)
+     y = 1;
+     for D = Dv(1:9)
+         load(['_data/N' num2str(N) '-T' num2str(T) '-A' num2str(Av(1)*100) '-B' num2str(Bv(1)*100) '-C' num2str(C*10000) '-D' num2str(D*10000)]);
+         S(dx, y) = mean(RES(:, 4))/mean(RES(:, 3));
+         y = y + 1;
+    end
+    dx = dx - 1;
+end
+imagesc(S);
+colormap(flipud(jet));
+c = colorbar('Ticks', 1:2:9, 'FontSize', 20, 'Limits', [1 10]);
+c.Label.FontSize = 22;
+c.Label.String = ['Polarity ' PR{4} '/' PR{3}];
+set(gca, 'FontSize', 22, 'XTick', 2:2:8, 'YTick', 2:2:8, 'XTickLabel', Dv(2:2:8), 'YTickLabel', Cv(end-9:-18:1), 'dataAspectRatio', [1 1 1]);
+ylabel('\gamma', 'FontSize', 24, 'FontWeight', 'bold');
+xlabel('\delta', 'FontSize', 24, 'FontWeight', 'bold');
+xtickangle(30)
+f = gcf; f.PaperSize = [f.PaperPosition(3) f.PaperPosition(4)];
+print('Fig6e.pdf', '-dpdf');
 
 %% Panel F: Misoriented clusters
-N = 1e4;
-T = 1e5;
 Av = [0.99 0.99  0.99];
 Bv = [0.8  0.8   0.8];
-Cv = [0    0     0.1];
+Cv = [0    0     0.5];
 Dv = [0    0.001 0.001];
 generateData(N, T, Av, Bv, Cv, Dv);
 
@@ -180,41 +179,40 @@ for i = 1:numel(Dv)
         'DisplayName', ['{\bf{' TX{i}, '}} \gamma=' num2str(Cv(i)) ', \delta='  num2str(Dv(i))]); hold on;
 end
 set(gca, 'Box', 'on', 'FontSize', 22, 'LineWidth', 1.5, 'XTick', 0:20:80, 'YTick', 0:0.5:1);
-legend('Box', 'off', 'FontSize', 17);
+legend('Box', 'off', 'FontSize', 18);
 axis([0 80 0 1], 'square');
-saveas(gcf, 'Fig6f.png');
+f = gcf; f.PaperSize = [f.PaperPosition(3) f.PaperPosition(4)];
+print('Fig6f.pdf', '-dpdf');
 
 %% Panels GH: 2-color predictions
-N = 1e4;
-T = 1e5;
 Av = 0.99;
 Bv = 0.8;
-Cv = 0.1;
-Dv = 0.01;
+Cv = 0.5;
+Dv = 0.001;
 generateData(N, T, Av, Bv, Cv, Dv);
 
 figure(1); clf;
-set(gcf, 'color', 'w', 'Position', [0 0 800 400]);
+set(gcf, 'color', 'w', 'Position', [0 0 850 400]);
 tiledlayout(1, 2, 'TileSpacing', 'default', 'Padding', 'tight');
-panelGH(N, T, Av, Bv, Cv, Dv, 6, 5, 80, 80, [PD '+' PP], [DD '+' DP]);
-legend(['\gamma=' num2str(Cv) ', \delta='  num2str(Dv)], 'Location', 'northwest', 'Box', 'off', 'FontSize', 19);
-panelGH(N, T, Av, Bv, Cv, Dv, 4, 3, 80, 25, PP, PD);
-legend(['\gamma=' num2str(Cv) ', \delta=' num2str(Dv)], 'Location', 'northeast', 'Box', 'off', 'FontSize', 19);
-saveas(gcf, 'Fig6gh.png');
+R = panelGH(N, T, Av, Bv, Cv, Dv, 6, 5, 80, 80, [PD '+' PP], [DD '+' DP]);
+legend(['\gamma=' num2str(Cv) ', \delta='  num2str(Dv) ', N=200, r=' num2str(R(2, 1), 1)], 'Location', 'northwest', 'Box', 'off', 'FontSize', 19);
+R = panelGH(N, T, Av, Bv, Cv, Dv, 4, 3, 80, 80, PP, PD);
+legend(['\gamma=' num2str(Cv) ', \delta=' num2str(Dv) ', N=200, r=' num2str(R(2, 1), 1)], 'Location', 'northeast', 'Box', 'off', 'FontSize', 19);
+f = gcf; f.PaperSize = [f.PaperPosition(3) f.PaperPosition(4)];
+print('Fig6gh.pdf', '-dpdf');
 
-function panelGH(N, T, Av, Bv, Cv, Dv, x, y, xm, ym, xt, yt)
+function R = panelGH(N, T, Av, Bv, Cv, Dv, x, y, xm, ym, xt, yt)
 nexttile;
 load(['_data/N' num2str(N) '-T' num2str(T) '-A' num2str(Av*100) '-B' num2str(Bv*100) '-C' num2str(Cv*10000) '-D' num2str(Dv*10000)]);
-scatter(RES(:, x), RES(:, y), 200, [0 0.4470 0.7410], 'filled', 'MarkerFaceAlpha', 0.2);
+scatter(RES(1:200, x), RES(1:200, y), 200, [0 0.4470 0.7410], 'filled', 'MarkerFaceAlpha', 0.2);
+R = corrcoef(RES(1:200, x), RES(1:200, y));
 set(gca, 'Box', 'on', 'FontSize', 22, 'LineWidth', 1.5);
 xlabel(['Cluster size ' xt], 'FontSize', 24);
 ylabel(['Cluster size ' yt], 'FontSize', 24);
 axis([0 xm 0 ym], 'square');
 end
 
-%% Figure S9: Parameter scan
-N = 1e4;
-T = 1e5;
+%% Figure S10: Parameter scan
 Av = [0.99*ones(1,10) 0.9*ones(1,10) 0.99*ones(1,10) 0.9*ones(1,10) 0.99*ones(1,10) 0.9*ones(1,10)];
 Bv = [repmat([0 0.4 0.8 0.9 0.99], 1, 4) 0.8*ones(1,40)];
 Cv = [0.1*ones(1,20) repmat([0 1e-4 1e-3 1e-2 1e-1], 1, 4) 0.1*ones(1,20)];
@@ -249,7 +247,8 @@ text(0, 4.2e8, '\alpha = 0.9', 'FontSize', 24, 'FontWeight', 'bold', 'Horizontal
 set(nexttile(1), 'YTick', [1e-3 1e-2 0.1 1], 'XTickLabel', '');
 set(nexttile(5), 'YTick', [1e-3 1e-2 0.1 1], 'XTickLabel', '');
 set(nexttile(9), 'YTick', [1e-3 1e-2 0.1 1]);
-saveas(gcf, 'FigS9.png');
+f = gcf; f.PaperSize = [f.PaperPosition(3) f.PaperPosition(4)];
+print('FigS10.pdf', '-dpdf');
 
 %% GENERATE DATA
 function generateData(N, T, Av, Bv, Cv, Dv)
