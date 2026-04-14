@@ -12,15 +12,6 @@ In subfolders named '7-res', there are .mat files containing the fluorophore ste
 
 To download the raw TIRF images underlying the figures, we refer to	https://doi.org/10.25740/sp776gx3909.
 
-These MATLAB scripts were tested successfully using:
-MATLAB Version: 25.2.0.3177638 (R2025b) Update 5
-MATLAB License Number: 569029
-Operating System: macOS  Version: 26.4.1 Build: 25E253 
-Java Version: Java is not loaded
-MATLAB                                                Version 25.2        (R2025b)
-Curve Fitting Toolbox                                 Version 25.2        (R2025b)
-Image Processing Toolbox                              Version 25.2        (R2025b)
-Signal Processing Toolbox                             Version 25.2        (R2025b)
-Statistics and Machine Learning Toolbox               Version 25.2        (R2025b)
+These MATLAB scripts were tested successfully using MATLAB R2025b with the Curve Fitting, Image Processing, Signal Processing, and Statistics & Machine Learning Toolboxes installed.
 
 For questions, please contact boye@stanford.edu.
